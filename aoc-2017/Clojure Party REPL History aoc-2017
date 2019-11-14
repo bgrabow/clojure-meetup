@@ -1,0 +1,134 @@
+user> (ns aoc-2017.day-01
+  (:require [clojure.string :as str]))
+
+(def input
+  (->> (slurp "resources/input-01.txt")
+    (str/split-lines)
+    first
+    (map str)
+    (map read-string)
+    (into [])))
+
+(defn captcha-1
+  [xs]
+  (->> (map vector xs (drop 1 (cycle xs)))
+    (filter #(apply = %))
+    (map first)
+    (reduce +)))
+
+(defn captcha-half
+  [xs]
+  (->> (map vector xs (drop (/ (count xs) 2) (cycle xs)))
+    (filter #(apply = %))
+    (map first)
+    (reduce +)))
+
+
+(comment
+  (captcha-1 input)
+  (captcha-half input))
+
+nil
+aoc-2017.day-01> aoc-2017.day-01> #'aoc-2017.day-01/input
+aoc-2017.day-01> aoc-2017.day-01> #'aoc-2017.day-01/captcha-1
+aoc-2017.day-01> aoc-2017.day-01> #'aoc-2017.day-01/captcha-half
+aoc-2017.day-01> aoc-2017.day-01> aoc-2017.day-01> nil
+aoc-2017.day-01> aoc-2017.day-01> (captcha-1 input)
+1034
+aoc-2017.day-01> (captcha-half input)
+1356
+aoc-2017.day-01> (slurp "resources/input-02.txt")
+"62\t1649\t1731\t76\t51\t1295\t349\t719\t52\t1984\t2015\t2171\t981\t1809\t181\t1715\n161\t99\t1506\t …more"
+aoc-2017.day-01> (slurp "resources/input-02.txt")
+"62\t1649\t1731\t76\t51\t1295\t349\t719\t52\t1984\t2015\t2171\t981\t1809\t181\t1715\n161\t99\t1506\t …more"
+aoc-2017.day-01> (slurp "resources/input-02.txt")
+"62\t1649\t1731\t76\t51\t1295\t349\t719\t52\t1984\t2015\t2171\t981\t1809\t181\t1715\n161\t99\t1506\t 1658	84	78	533	242	1685	86	107	1548	670	960	1641	610
+95	2420	2404	2293	542	2107	 2198	121	109	209	2759	1373	1446	905	1837	111
+552	186	751	527	696	164	114	530	558 	307	252	200	481	142	205	479
+581	1344	994	1413	120	112	656	1315	1249	193	1411	12 80	110	103	74	1007
+2536	5252	159	179	4701	1264	1400	2313	4237	161	142	4336	1061	 3987	2268	4669
+3270	1026	381	185	293	3520	1705	1610	3302	628	3420	524	3172	244	2 95	39
+4142	1835	4137	3821	3730	2094	468	141	150	3982	147	4271	1741	2039	4410	179
+1796	83	2039	1252	84	1641	2165	1218	1936	335	1807	2268	66	102	1977	2445
+96	65	2 01	275	257	282	233	60	57	200	216	134	72	105	81	212
+3218	5576	5616	5253	178	3317	 6147	5973	2424	274	4878	234	200	4781	5372	276
+4171	2436	134	3705	3831	3952	2603	 115	660	125	610	152	4517	587	1554	619
+2970	128	2877	1565	1001	167	254	2672	59	47 …more"
+aoc-2017.day-01> (ns aoc-2017.day-02
+  (:require [clojure.string :as str]))
+nil
+aoc-2017.day-02> (def input
+  (->> (slurp "resources/input-02.txt")
+    (str/split-lines)))
+#'aoc-2017.day-02/input
+aoc-2017.day-02> input
+["62\t1649\t1731\t76\t51\t1295\t349\t719\t52\t1984\t2015\t2171\t981\t1809\t181\t1715" "161\t99\t1506\t1658\t84\t78\t533\t242\t1685\t86\t107\t1548\t670\t960\t1641\t610" "95\t2420\t2404\t2293\t542\t2107\t2198\t121\t109\t209\t2759\t1373\t1446\t905\t1837\t111" "552\t186\t751\t527\t696\t164\t114\t530\t558\t307\t252\t200\t481\t142\t205\t479" "581\t1344\t994\t1413\t120\t112\t656\t1315\t1249\t193\t1411\t1280\t110\t103\t74\t1007" "2536\t5252\t159\t179\t4701\t1264\t1400\t2313\t4237\t161\t142\t4336\t1061\t3987\t2268\t4669" "3270\t1026\t381\t185\t293\t3520\t1705\t1610\t3302\t628\t3420\t524\t3172\t244\t295\t39" "4142\t1835\t4137\t3821\t3730\t2094\t468\t141\t150\t3982\t147\t4271\t1741\t2039\t4410\t179" "1796\t83\t2039\t1252\t84\t1641\t2165\t1218\t1936\t335\t1807\t2268\t66\t102\t1977\t2445" "96\t65\t201\t275\t257\t282\t233\t60\t57\t200\t216\t134\t72\t105\t81\t212" …more]
+aoc-2017.day-02> (def input
+  (->> (slurp "resources/input-02.txt")
+    (str/split-lines)
+    (map #(str/split % #"\t"))))
+#'aoc-2017.day-02/input
+aoc-2017.day-02> input
+(["62" "1649" "1731" "76" "51" "1295" "349" "719" "52" "1984" …more] ["161" "99" "1506" "1658" "84" "78" "533" "242" "1685" "86" …more] ["95" "2420" "2404" "2293" "542" "2107" "2198" "121" "109" "209" …more] ["552" "186" "751" "527" "696" "164" "114" "530" "558" "307" …more] ["581" "1344" "994" "1413" "120" "112" "656" "1315" "1249" "193" …more] ["2536" "5252" "159" "179" "4701" "1264" "1400" "2313" "4237" "161" …more] ["3270" "1026" "381" "185" "293" "3520" "1705" "1610" "3302" "628" …more] ["4142" "1835" "4137" "3821" "3730" "2094" "468" "141" "150" "3982" …more] ["1796" "83" "2039" "1252" "84" "1641" "2165" "1218" "1936" "335" …more] ["96" "65" "201" "275" "257" "282" "233" "60" "57" "200" …more] …more)
+aoc-2017.day-02> (def input
+  (->> (slurp "resources/input-02.txt")
+    (str/split-lines)
+    (map #(read-string (str/split % #"\t")))))
+#'aoc-2017.day-02/input
+aoc-2017.day-02> input
+([java.lang.ClassCastException "class clojure.lang.PersistentVector cannot be cast to class java.lang.String (cl …more" [[clojure.core$read_string invokeStatic "core.clj" 3805] [clojure.core$read_string invoke "core.clj" 3805] [aoc_2017.day_02$fn__2773 invokeStatic "repl-entry" 4] [aoc_2017.day_02$fn__2773 invoke "repl-entry" 4] [clojure.core$map$fn__5851 invoke "core.clj" 2753] [clojure.lang.LazySeq sval "LazySeq.java" 42] [clojure.lang.LazySeq seq "LazySeq.java" 51] [clojure.lang.RT seq "RT.java" 531] [clojure.core$seq__5387 invokeStatic "core.clj" 137] [clojure.core$seq__5387 invoke "core.clj" 137] …more]])
+aoc-2017.day-02> (def input
+  (->> (slurp "resources/input-02.txt")
+    (str/split-lines)
+    (map #(map read-string (str/split % #"\t")))))
+#'aoc-2017.day-02/input
+aoc-2017.day-02> input
+((62 1649 1731 76 51 1295 349 719 52 1984 2015 2171 981 1809 181 1715) (161 99 1506 1658 84 78 533 242 1685 86 107 1548 670 960 1641 610) (95 2420 2404 2293 542 2107 2198 121 109 209 …more) (552 186 751 527 696 164 114 530 558 307 …more) (581 1344 994 1413 120 112 656 1315 1249 193 …more) (2536 5252 159 179 4701 1264 1400 2313 4237 161 …more) (3270 1026 381 185 293 3520 1705 1610 3302 628 …more) (4142 1835 4137 3821 3730 2094 468 141 150 3982 …more) (1796 83 2039 1252 84 1641 2165 1218 1936 335 …more) (96 65 201 275 257 282 233 60 57 200 216 134 72 105 81 212) (3218 5576 5616 5253 178 3317 6147 5973 2424 274 4878 234 200 4781 5372 276) (4171 2436 134 3705 3831 3952 2603 115 660 125 …more) (2970 128 2877 1565 1001 167 254 2672 59 473 …more) (271 348 229 278 981 1785 2290 516 473 2037 …more) (2208 2236 1451 621 1937 1952 865 61 1934 49 …more) (94 2312 2397 333 1192 106 2713 2351 2650 2663 …more))
+aoc-2017.day-02> (def input
+  (->> (slurp "resources/input-02.txt")
+    (str/split-lines)
+    (mapv #(mapv read-string (str/split % #"\t")))))
+#'aoc-2017.day-02/input
+aoc-2017.day-02> input
+[[62 1649 1731 76 51 1295 349 719 52 1984 2015 2171 981 1809 181 1715] [161 99 1506 1658 84 78 533 242 1685 86 …more] [95 2420 2404 2293 542 2107 2198 121 109 209 …more] [552 186 751 527 696 164 114 530 558 307 …more] [581 1344 994 1413 120 112 656 1315 1249 193 …more] [2536 5252 159 179 4701 1264 1400 2313 4237 161 …more] [3270 1026 381 185 293 3520 1705 1610 3302 628 …more] [4142 1835 4137 3821 3730 2094 468 141 150 3982 …more] [1796 83 2039 1252 84 1641 2165 1218 1936 335 …more] [96 65 201 275 257 282 233 60 57 200 …more] [3218 5576 5616 5253 178 3317 6147 5973 2424 274 …more] [4171 2436 134 3705 3831 3952 2603 115 660 125 …more] [2970 128 2877 1565 1001 167 254 2672 59 473 …more] [271 348 229 278 981 1785 2290 516 473 2037 …more] [2208 2236 1451 621 1937 1952 865 61 1934 49 …more] [94 2312 2397 333 1192 106 2713 2351 2650 2663 …more]]
+aoc-2017.day-02> (defn checksum
+  [lines]
+  (reduce + (map checksum-line lines)))
+clojure.lang.Compiler$CompilerException Unable to resolve symbol: checksum-line in this context Util.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+aoc-2017.day-02> (def checksum-line
+  [line]
+  (let [low (apply min line)
+        high (apply max line)]
+    (- high low)))
+clojure.lang.Compiler$CompilerException Too many arguments to def Util.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+	Compiler.java
+	core.clj
+	core.clj
+	NO_SOURCE_FILE
+aoc-2017.day-02> (defn checksum-line
+  [line]
+  (let [low (apply min line)
+        high (apply max line)]
+    (- high low)))
+#'aoc-2017.day-02/checksum-line
+aoc-2017.day-02> (defn checksum
+  [lines]
+  (reduce + (map checksum-line lines)))
+#'aoc-2017.day-02/checksum
+aoc-2017.day-02> (checksum input)
+44216
+aoc-2017.day-02> 
