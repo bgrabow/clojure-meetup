@@ -4,7 +4,7 @@
 
 It's December, and that can only mean one thing: Santa needs saving again, and your coding skills can help!
 
-After a long hiatus, the Madison Clojure Meetup is back! We'll get together to solve some Advent of Code puzzles using Clojure. The 2019 Advent of Code problems will be available [here](https://adventofcode.com/2019) starting December 1st. Try out puzzles from past years ([2018](https://adventofcode.com/2018), [2017](https://adventofcode.com/2017)) if you want to get started early.
+After a long hiatus, the Madison Clojure Meetup is back! We'll get together to get beginners up and running with the language and the REPL, then solve some Advent of Code puzzles. The 2019 Advent of Code puzzles will be available [here](https://adventofcode.com/2019) starting December 1st, but you can try out puzzles from past years ([2018](https://adventofcode.com/2018), [2017](https://adventofcode.com/2017)) if you want to get started early.
 
 For newcomers to Clojure we'll have environment setup and language introduction resources available, as well as experienced Clojure users on hand to guide you through getting started. Feel free to run through some of the resources linked below prior to the meetup if you want a head start.
 
