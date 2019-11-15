@@ -2,6 +2,8 @@
 
 This is a beginner-friendly Clojure setup for Atom, with a minimal set of package dependencies and custom keybindings. Credit goes to [@jasongilman](https://github.com/jasongilman) for his excellent [ProtoREPL setup guide](https://gist.github.com/jasongilman/d1f70507bed021b48625/cde5626b1df66fc62c315c38b52f827b46777d61), from which I copied much of the content for this guide.
 
+Jump down to [Configuration summary](##Configuration_Summary) for the TL;DR if you're already comfortable configuring Atom.
+
 ## Install Atom
 
 [Download Atom](https://atom.io/)
@@ -10,7 +12,7 @@ The [Atom documentation](https://atom.io/docs) is excellent. It's highly worth r
 
 ## Install Java and Leiningen
 
-* Java Development Kit (choose one of the following; I prefer Amazon Corretto)
+* Java (choose one of the following; I prefer Amazon Corretto)
   * [Amazon Corretto](https://docs.aws.amazon.com/corretto/latest/corretto-11-ug/downloads-list.html)
   * [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11&jvmVariant=hotspot)
   * [Other options](https://en.wikipedia.org/wiki/OpenJDK#OpenJDK_builds) (mind the license restrictions)
@@ -20,20 +22,23 @@ The [Atom documentation](https://atom.io/docs) is excellent. It's highly worth r
 
 These are the ones I install related to Clojure development.
 
-* [Party REPL](https://atom.io/packages/clojure-party-repl) - Clojure REPL, remote pairing support
+* [Party REPL](https://atom.io/packages/clojure-party-repl) - Clojure REPL with remote pairing support
 * [Parinfer](https://atom.io/packages/parinfer) - Handles parentheses and general Lisp editing.
 * [lisp-paredit](https://atom.io/packages/lisp-paredit) - Used only for some basic cursor motions (expand/contract selection, forward/backward s-expression)
 * (optional) [teletype](https://atom.io/packages/teletype) - Remote collaboration tool (required for Party REPL's remote pairing support)
 
-## Package Settings
+## Configuration summary
+
+The files attached to this gist show my completed configuration settings. If you're setting up Atom from scratch you can use these files verbatim and skip the following configuration instructions.
+
+## Package Configuration
 
 ### language-clojure
 
 This is the built in package that comes with Atom for the Clojure Grammar. I find the default settings bad for the way that I work. I recommend changing them to the following.
 
-* Auto Indent: unchecked
 * Auto Indent On Paste: unchecked
-* Non Word Characters: `())"':,;~@#$%^&{}[]`
+* Non Word Characters: `()"':,;~@#$%^&{}[]`
 * Tab Length: `1`
 
 Everything else is left at the default.
@@ -49,17 +54,17 @@ Everything else is left at the default.
 
 * Smart Mode: checked
 
-## Atom Settings
+### Atom Core Settings
 
-These are main Atom Settings related to Clojure that are different than the default.
+These are main Atom settings related to Clojure that are different than the default.
 
 * Auto Indent On Paste: unchecked
 * Scroll Past End: checked
   * Due to [this autocomplete issue](https://github.com/atom/autocomplete-plus/issues/680) there is a lot of flashing from the autocomplete window that pops up. Scrolling down farther usually resolves the issue.
 
-## `config.cson`
+### `config.cson`
 
-Open your `config.cson` file (enter `Application: Open Your Config` in Atom command palette) and add the following under the `".clojure.source":` heading:
+Open your `config.cson` file (`Application: Open Your Config` in Atom command palette) and add the following under the `".clojure.source":` heading (credit [@lucasdf](https://gist.github.com/jasongilman/d1f70507bed021b48625/cde5626b1df66fc62c315c38b52f827b46777d61#gistcomment-2586616)):
 
 ```cson
   "bracket-matcher":
@@ -75,9 +80,9 @@ Open your `config.cson` file (enter `Application: Open Your Config` in Atom comm
     ]
 ```
 
-## `keymap.cson`
+### `keymap.cson`
 
-Open your `keymap.cson` file (enter `Application: Open Your Keymap` in Atom command palette) and add the following entry:
+Open your `keymap.cson` file (`Application: Open Your Keymap` in Atom command palette) and add the following entry:
 
 ```
 'atom-text-editor[data-grammar~="clojure"]':
@@ -87,4 +92,10 @@ Open your `keymap.cson` file (enter `Application: Open Your Keymap` in Atom comm
   'alt-left': 'lisp-paredit:backward-sexp'
 ```
 
-These keybindings give you basic navigation capabilities. `alt-up` and `alt-down` expand and contract your text selection by one level in the s-expression tree.
+## Basic REPL interaction hints
+
+The above keybindings give you basic s-expression navigation capabilities. `alt-right` and `alt-left` move the cursor forward or backward to the next s-expression boundary. Use these keystrokes, along with simple `right` and `left` arrow keypresses, to move the cursor quickly through your code.
+
+Party REPL provides a default  OSX keybinding of `cmd-enter` (`ctrl-enter` on Linux/Windows) to send the current top-level form to be evaluated in the REPL. To evaluate an inner form I use `cmd-up` to select the inner form I'm interested in, then use `cmd-enter` to evaluate just the selected form.
+
+Parinfer has [an excellent guide](http://shaunlebron.github.io/parinfer/#indent-mode) that describes how it works. I prefer using Indent/Smart mode in the Atom Parinfer package.
