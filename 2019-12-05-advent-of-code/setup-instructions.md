@@ -2,6 +2,8 @@
 
 This is a beginner-friendly Clojure setup for Atom, with a minimal set of package dependencies and custom keybindings. Credit goes to [@jasongilman](https://github.com/jasongilman) for his excellent [ProtoREPL setup guide](https://gist.github.com/jasongilman/d1f70507bed021b48625/cde5626b1df66fc62c315c38b52f827b46777d61), from which I copied much of the content for this guide.
 
+There are many improvements that can be made to this setup as you gain experience with Atom, Clojure, and related packages, but this guide is intended to focus on the essential basics a beginner needs for a smooth REPL-driven workflow.
+
 Jump down to [Configuration summary](##Configuration_Summary) for the TL;DR if you're already comfortable configuring Atom.
 
 ## Install Atom
