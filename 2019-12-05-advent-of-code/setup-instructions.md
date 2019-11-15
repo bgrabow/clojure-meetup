@@ -37,6 +37,7 @@ The files attached to this gist show my completed configuration settings. If you
 
 This is the built in package that comes with Atom for the Clojure Grammar. I find the default settings bad for the way that I work. I recommend changing them to the following.
 
+* Auto Indent: unchecked
 * Auto Indent On Paste: unchecked
 * Non Word Characters: `()"':,;~@#$%^&{}[]`
 * Tab Length: `1`
@@ -90,6 +91,7 @@ Open your `keymap.cson` file (`Application: Open Your Keymap` in Atom command pa
   'alt-down': 'lisp-paredit:contract-selection'
   'alt-right': 'lisp-paredit:forward-sexp'
   'alt-left': 'lisp-paredit:backward-sexp'
+  'enter': 'lisp-paredit:newline'
 ```
 
 ## Basic REPL interaction hints
