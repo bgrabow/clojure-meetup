@@ -1,6 +1,12 @@
 (ns aoc-2019.day-03
   (:require [clojure.string :as str]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [clojure.pprint :refer [pprint]]))
+
+(def examples
+  ["R8,U5,L5,D3\nU7,R6,D4,L4\n"
+   "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83\n"
+   "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7\n"])
 
 (def directions
   {"R" [0 1]
@@ -16,43 +22,56 @@
               {:direction (directions direction-code)
                :distance (Integer/parseInt distance)}))))
 
-(def wire-parametric-segments
-  (->> (slurp "resources/input-03.txt")
+(defn wire-steps
+  [wire]
+  (lazy-cat
+    (when-let [{dir :direction
+                dist :distance} (first wire)]
+      (repeat dist dir))
+    (when (next wire)
+      (wire-steps (rest wire)))))
+
+(defn parse-wires
+  [raw-wires]
+  (->> raw-wires
        (str/split-lines)
        (map parse-wire)))
 
-(defn spaces-traversed
-  [start direction distance]
-  (let [[x y] start
-        [dx dy] direction]
-    (set
-      (for [x' (take distance (next (iterate #(+ dx %) x)))
-            y' (take distance (next (iterate #(+ dy %) y)))]
-        [x' y']))))
+(map wire-steps (parse-wires (examples 0)))
 
-(defn step
-  [{current :current occupied :occupied :as state}
-   {direction :direction
-    distance :distance}]
-  (-> state
-      (update :occupied into (spaces-traversed current direction distance))
-      (update :current #(map + % (map * direction (repeat distance))))))
-
-(def wires (map #(reduce step
-                         {:occupied #{[0 0]}
-                          :current [0 0]}
-                         %)
-                wire-parametric-segments))
-
-(def intersections
-  (->> wires
-       (map :occupied)
-       (map #(disj % [0 0]))
-       (apply set/intersection)))3229
+(defn wire-footprint
+  [wire]
+  (zipmap (next (reductions #(mapv + %1 %2) [0 0] (wire-steps wire)))
+          (next (range))))
 
 (defn manhattan-distance
   [[x y] [x' y']]
   (+ (Math/abs ^long (- x x'))
      (Math/abs ^long (- y y'))))
 
-(first (sort (map (partial manhattan-distance [0 0]) intersections)))
+(defn find-closest-intersection
+  [[wire-a wire-b]]
+  (let [intersections (set/intersection (set (keys wire-a)) (set (keys wire-b)))]
+    (->> (map (partial manhattan-distance [0 0]) intersections)
+         (sort)
+         first)))
+
+(defn find-shortest-path-intersection
+  [[wire-a wire-b]]
+  (let [intersections (set/intersection (set (keys wire-a)) (set (keys wire-b)))]
+    (->> (zipmap intersections (map #(+ (wire-a %) (wire-b %)) intersections))
+         (sort-by second)
+         (first))))
+
+(def wire-footprints
+  (->> (wire-footprints (parse-wires (slurp "resources/input-03.txt")))
+       (map :occupied)
+       (map #(dissoc % [0 0]))))
+
+(defn solve-p1
+  []
+  (find-closest-intersection (map wire-footprint (parse-wires (slurp "resources/input-03.txt")))))
+
+(defn solve-p2
+  []
+  (find-shortest-path-intersection (map wire-footprint (parse-wires (slurp "resources/input-03.txt")))))
