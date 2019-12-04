@@ -53,20 +53,14 @@
   [[wire-a wire-b]]
   (let [intersections (set/intersection (set (keys wire-a)) (set (keys wire-b)))]
     (->> (map (partial manhattan-distance [0 0]) intersections)
-         (sort)
-         first)))
+         (apply min))))
 
 (defn find-shortest-path-intersection
   [[wire-a wire-b]]
   (let [intersections (set/intersection (set (keys wire-a)) (set (keys wire-b)))]
     (->> (zipmap intersections (map #(+ (wire-a %) (wire-b %)) intersections))
-         (sort-by second)
-         (first))))
-
-(def wire-footprints
-  (->> (wire-footprints (parse-wires (slurp "resources/input-03.txt")))
-       (map :occupied)
-       (map #(dissoc % [0 0]))))
+         (map second)
+         (apply min))))
 
 (defn solve-p1
   []
