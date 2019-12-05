@@ -22,27 +22,26 @@
               {:direction (directions direction-code)
                :distance (Integer/parseInt distance)}))))
 
-(defn wire-steps
-  [wire]
-  (lazy-cat
-    (when-let [{dir :direction
-                dist :distance} (first wire)]
-      (repeat dist dir))
-    (when (next wire)
-      (wire-steps (rest wire)))))
-
 (defn parse-wires
   [raw-wires]
   (->> raw-wires
        (str/split-lines)
        (map parse-wire)))
 
-(map wire-steps (parse-wires (examples 0)))
+(defn wire-steps
+  [wire]
+  (lazy-cat
+    (when-let [{dir  :direction
+                dist :distance} (first wire)]
+      (repeat dist dir))
+    (when (next wire)
+      (wire-steps (rest wire)))))
 
 (defn wire-footprint
   [wire]
-  (zipmap (next (reductions #(mapv + %1 %2) [0 0] (wire-steps wire)))
-          (next (range))))
+  (zipmap
+    (drop 1 (reductions #(mapv + %1 %2) [0 0] (wire-steps wire)))
+    (drop 1 (range))))
 
 (defn manhattan-distance
   [[x y] [x' y']]
@@ -61,17 +60,15 @@
   (let [intersections (set/intersection (set (keys wire-a)) (set (keys wire-b)))]
     (->> (zipmap intersections (map #(+ (wire-a %) (wire-b %)) intersections))
          (sort-by second)
-         (first))))
-
-(def wire-footprints
-  (->> (wire-footprints (parse-wires (slurp "resources/input-03.txt")))
-       (map :occupied)
-       (map #(dissoc % [0 0]))))
+         (first)
+         second)))
 
 (defn solve-p1
   []
-  (find-closest-intersection (map wire-footprint (parse-wires (slurp "resources/input-03.txt")))))
+  (time
+    (find-closest-intersection (map wire-footprint (parse-wires (slurp "resources/input-03.txt"))))))
 
 (defn solve-p2
   []
-  (find-shortest-path-intersection (map wire-footprint (parse-wires (slurp "resources/input-03.txt")))))
+  (time
+    (find-shortest-path-intersection (map wire-footprint (parse-wires (slurp "resources/input-03.txt"))))))
