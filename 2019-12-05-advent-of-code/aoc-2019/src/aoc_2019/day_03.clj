@@ -22,26 +22,27 @@
               {:direction (directions direction-code)
                :distance (Integer/parseInt distance)}))))
 
+(defn wire-steps
+  [wire]
+  (lazy-cat
+    (when-let [{dir :direction
+                dist :distance} (first wire)]
+      (repeat dist dir))
+    (when (next wire)
+      (wire-steps (rest wire)))))
+
 (defn parse-wires
   [raw-wires]
   (->> raw-wires
        (str/split-lines)
        (map parse-wire)))
 
-(defn wire-steps
-  [wire]
-  (lazy-cat
-    (when-let [{dir  :direction
-                dist :distance} (first wire)]
-      (repeat dist dir))
-    (when (next wire)
-      (wire-steps (rest wire)))))
+(map wire-steps (parse-wires (examples 0)))
 
 (defn wire-footprint
   [wire]
-  (zipmap
-    (drop 1 (reductions #(mapv + %1 %2) [0 0] (wire-steps wire)))
-    (drop 1 (range))))
+  (zipmap (next (reductions #(mapv + %1 %2) [0 0] (wire-steps wire)))
+          (next (range))))
 
 (defn manhattan-distance
   [[x y] [x' y']]
@@ -52,23 +53,19 @@
   [[wire-a wire-b]]
   (let [intersections (set/intersection (set (keys wire-a)) (set (keys wire-b)))]
     (->> (map (partial manhattan-distance [0 0]) intersections)
-         (sort)
-         first)))
+         (apply min))))
 
 (defn find-shortest-path-intersection
   [[wire-a wire-b]]
   (let [intersections (set/intersection (set (keys wire-a)) (set (keys wire-b)))]
     (->> (zipmap intersections (map #(+ (wire-a %) (wire-b %)) intersections))
-         (sort-by second)
-         (first)
-         second)))
+         (map second)
+         (apply min))))
 
 (defn solve-p1
   []
-  (time
-    (find-closest-intersection (map wire-footprint (parse-wires (slurp "resources/input-03.txt"))))))
+  (find-closest-intersection (map wire-footprint (parse-wires (slurp "resources/input-03.txt")))))
 
 (defn solve-p2
   []
-  (time
-    (find-shortest-path-intersection (map wire-footprint (parse-wires (slurp "resources/input-03.txt"))))))
+  (find-shortest-path-intersection (map wire-footprint (parse-wires (slurp "resources/input-03.txt")))))
