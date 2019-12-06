@@ -18,12 +18,11 @@
 
 (defn parent-orbits
   [orbits body]
-  (take-while (comp not nil?)
-              (iterate orbits body)))
+  (take-while some? (rest (iterate orbits body))))
 
 (defn orbit-depth
   [orbits body]
-  (dec (count (parent-orbits orbits body))))
+  (count (parent-orbits orbits body)))
 
 (defn common-root-depth
   [orbits a b]
@@ -34,16 +33,23 @@
 (def test-orbits
   (parse-orbits "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN"))
 
+(defn symmetric-difference
+  [s1 s2]
+  (set/difference (set/union s1 s2)
+                  (set/intersection s1 s2)))
+
 (defn solve-p1
   [orbits]
   (reduce +
-          (map (partial orbit-depth orbits) (keys orbits))))
+          (map (partial orbit-depth orbits)
+               (keys orbits))))
 
 (defn solve-p2
   [orbits]
-  (+ (- (dec (orbit-depth orbits "YOU")) (common-root-depth orbits "YOU" "SAN"))
-     (- (dec (orbit-depth orbits "SAN")) (common-root-depth orbits "YOU" "SAN"))))
+  (count
+    (symmetric-difference (set (parent-orbits orbits "YOU"))
+                          (set (parent-orbits orbits "SAN")))))
 
 (comment
-  (solve-p1 orbits)
-  (solve-p2 orbits))
+  (time (solve-p1 orbits))
+  (time (solve-p2 orbits)))
