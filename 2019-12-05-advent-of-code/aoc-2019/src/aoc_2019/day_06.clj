@@ -4,7 +4,8 @@
 
 (defn parse-orbit
   [s]
-  (vec (reverse (str/split s #"\)"))))
+  (let [[orbitee orbiter] (str/split s #"\)")]
+    [orbiter orbitee]))
 
 (defn parse-orbits
   [s]
