@@ -43,9 +43,9 @@
 
 (defn process
   [memory location output input]
-  (let [[modes opcode] (parse-opcode (memory location))
+  (let [[arg-modes opcode] (parse-opcode (memory location))
         [x y z] (map (partial lookup memory)
-                     modes
+                     arg-modes
                      (subvec memory (inc location)))]
     ;(println memory)
     ;(println "loc" location "mem" (map memory (range location (+ 4 location))))
