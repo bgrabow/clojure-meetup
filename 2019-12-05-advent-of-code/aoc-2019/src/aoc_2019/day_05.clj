@@ -43,12 +43,12 @@
 
 (defn process
   [memory location output input]
+  ;(println (map vector (range) memory))
+  ;(println "loc" location "mem" (map memory (range location (+ 4 location))) "input" input)
   (let [[modes opcode] (parse-opcode (memory location))
         [x y z] (map (partial lookup memory)
                      modes
                      (subvec memory (inc location)))]
-    ;(println memory)
-    ;(println "loc" location "mem" (map memory (range location (+ 4 location))))
     ;(println "OPCODE" (memory location) "=>" [modes opcode])
     ;(println "MEMORY" (take 3 (subvec memory (inc location))) "=>" [x y z])
     (case opcode
@@ -64,12 +64,13 @@
                (+ 2 location)
                output
                (rest input))
-      4 (do
-          (println "output" x)
-          (recur memory
-                 (+ 2 location)
-                 (conj output x)
-                 input))
+      4 (do #_(println "output" x) [x])
+        #_(do
+            (println "output" x)
+            (recur memory
+                   (+ 2 location)
+                   (conj output x)
+                   input))
       5 (recur memory (if (zero? x) (+ 3 location) y) output input)
       6 (recur memory (if (zero? x) y (+ 3 location)) output input)
       7 (recur (assoc memory z (if (< x y) 1 0)) (+ 4 location) output input)
