@@ -1,9 +1,8 @@
 (ns aoc-2019.day-10
   (:require [clojure.string :as str]))
 
-
-
-(def space
+(defn parse-space
+  [space]
   (->> (into {}
              (mapcat
                (fn [y line]
@@ -13,10 +12,13 @@
                    (range)
                    line))
                (range)
-               (str/split-lines (slurp "resources/input-10.txt"))))
+               (str/split-lines space)))
        (keep (fn [[p space]]
                (when (= space \#) p)))
        (into #{})))
+
+(def space
+  (parse-space (slurp "resources/input-10.txt")))
 
 (defn unit-vector
   "Vector pointing from p1 to p2"
@@ -38,20 +40,20 @@
   [asteroid space]
   (count (distinct (map (partial unit-vector asteroid) space))))
 
+(defn find-best-vantage-point
+  [space]
+  (apply (partial max-key first)
+         (for [asteroid space]
+           [(n-asteroids-in-los asteroid (disj space asteroid))
+            asteroid])))
+
 (def best-vantage-point
-  (second
-    (apply (partial max-key first)
-           (for [asteroid space]
-             [(n-asteroids-in-los asteroid (disj space asteroid))
-              asteroid]))))
+  (second (find-best-vantage-point space)))
 
 (defn solve-p1
   []
   (first
-    (apply (partial max-key first)
-           (for [asteroid space]
-             [(n-asteroids-in-los asteroid (disj space asteroid))
-              asteroid]))))
+    (find-best-vantage-point space)))
 
 (defn manhattan-distance
   [p1 p2]
@@ -66,18 +68,22 @@
 
 (defn angle
   [[dx dy]]
-  (mod (+ (* 2 Math/PI) (Math/atan2 dx dy)) (* 2 Math/PI)))
+  (let [[dx' dy'] [dx (- dy)]]
+    (mod (+ (* 2 Math/PI) (Math/atan2 dx' dy')) (* 2 Math/PI))))
 
-(angle [0 1])
-(angle [0 -1])
-(angle [-1 0])
-(angle [1 0])
+(comment
+  ;; Image coordinates (+x right +y down)
+  (= Math/PI (angle [0 1]))
+  (= 0.0 (angle [0 -1]))
+  (= (* Math/PI (/ 3 2)) (angle [-1 0]))
+  (= (* Math/PI (/ 1 2)) (angle [1 0])))
 
-(def firing-sequence
+(defn compute-firing-sequence
+  [base space]
   (->> (reduce (fn [m [k v]]
                  (update m k conj v))
                {}
-               (asteroid-headings [11 13] (disj space [11 13])))
+               (asteroid-headings base (disj space base)))
        (map (fn [[k v]]
               [k (sort-by :distance v)]))
        (sort-by (comp angle first))
@@ -91,6 +97,29 @@
       (conj (subvec firing-sequence 1) (update current-heading 1 rest))
       (subvec firing-sequence 1))))
 
-(take 2 (iterate shoot-one firing-sequence))
+(defn next-target
+  [firing-sequence]
+  (-> firing-sequence
+      first
+      second
+      first))
 
-(shoot-one firing-sequence)
+(defn solve-p2
+  []
+  (let [[_ base] (find-best-vantage-point space)
+        [[[_ [{[x y] :coordinates}]]]] (->> (compute-firing-sequence base space)
+                                            (iterate shoot-one)
+                                            (drop 199)
+                                            (take 1))]
+    (+ y (* 100 x))))
+
+(comment
+  (solve-p1)
+  (solve-p2))
+
+(comment
+  (let [test-space (parse-space ".#....#####...#..\n##...##.#####..##\n##...#...#.#####.\n..#.....X...###..\n..#.#.....#....##")
+        test-space-2 (parse-space ".#..##.###...#######\n##.############..##.\n.#.######.########.#\n.###.#######.####.#.\n#####.##.#.##.###.##\n..#####..#.#########\n####################\n#.####....###.#.#.##\n##.#################\n#####.##.###..####..\n..######..##.#######\n####.##.####...##..#\n.#####..#.######.###\n##...#.##########...\n#.##########.#######\n.####.#.###.###.#.##\n....##.##.###..#####\n.#.#.###########.###\n#.#.#.#####.####.###\n###.##.####.##.#..##")]
+    (map next-target (take 20 (drop 0 (iterate shoot-one (compute-firing-sequence [8 3] test-space)))))
+    (map next-target (take 4 (drop 198 (iterate shoot-one (compute-firing-sequence (second (find-best-vantage-point test-space-2)) test-space-2)))))
+    (map next-target (take 4 (drop 198 (iterate shoot-one (compute-firing-sequence (second (find-best-vantage-point space)) space)))))))
