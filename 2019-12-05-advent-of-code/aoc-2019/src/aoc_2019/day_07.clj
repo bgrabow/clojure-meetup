@@ -88,7 +88,7 @@
       99 [memory location inputs outputs]))) ;; Fixed point, halt
 
 (defn run-until-fixed
-  [[memory location inputs outputs :as initial-state]]
+  [initial-state]
   (reduce
     (fn [prev-state state]
       (if (= prev-state state)
@@ -115,7 +115,7 @@
          (for [phases (c/permutations (range 5 10))]
            (let [amps (mapv (partial primed-amp memory) phases)]
              (->> (rest (iterate step-amps [0 amps]))
-                (map first) ;; Why doesn't this return?
+                (map first)
                 (take-while some?)
                 (partition 5)
                 (last)
