@@ -87,10 +87,11 @@
                           space)
           {[x y] :coordinates} (->> target-queues
                                     (iterate #(map next %))
-                                    (mapcat #(map first %))
+                                    (apply concat)
+                                    (map first)
                                     (drop 199)
-                                    first)]
-      (+ y (* 100 x)))))
+                                    (first))]
+      (+ (* x 100) y))))
 
 (comment
   (compute-firing-sequence (second (find-best-vantage-point space)) space))
