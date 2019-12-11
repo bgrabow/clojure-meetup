@@ -1,6 +1,13 @@
 (ns aoc-2019.day-09
   (:require [clojure.string :as str]))
 
+(defn parse-memory
+  [s]
+  (-> (str/split-lines s)
+      first
+      (str/split #",")
+      (->> (mapv #(bigint %)))))
+
 (def memory
   (-> (str/split-lines (slurp "resources/input-09.txt"))
       first
@@ -55,33 +62,54 @@
 (defn step-state
   [{:keys [memory location inputs] :as state}]
   (let [[op [x y z]] (parse-op state)]
+    ;(println location "  " (select-keys memory (range location (+ 4 location))) "  " op x y z)
     (case op
+
+      ;; Addition
       1 (-> state (assoc-in [:memory z] (plus (memory x) (memory y)))
                   (update :location + 4))
+
+      ;; Multiplication
       2 (-> state (assoc-in [:memory z] (mult (memory x) (memory y)))
                   (update :location + 4))
+
+      ;; Read input
       3 (if (empty? inputs)
           state
           (-> state (assoc-in [:memory x] (first inputs))
                     (update :location + 2)
                     (update :inputs next)))
+
+      ;; Write output
       4 (-> state (update :location + 2)
-                  (update :outputs conj (memory x)))
+                  (update :outputs concat (list (memory x))))
+
+      ;; Jump non-zero
       5 (assoc state :location (if (zero? (memory x))
                                  (+ 3 location)
                                  (memory y)))
+
+      ;; Jump zero
       6 (assoc state :location (if (zero? (memory x))
                                  (memory y)
                                  (+ 3 location)))
+
+      ;; Test less than
       7 (-> state (assoc-in [:memory z] (if (< (memory x) (memory y))
                                           1 0))
                   (update :location + 4))
+
+      ;; Test equal
       8 (-> state (assoc-in [:memory z] (if (= (memory x) (memory y))
                                           1 0))
                   (update :location + 4))
+
+      ;; Augment relative base
       9 (-> state (update :rel-base + (memory x))
                   (update :location + 2))
-      99 state)))
+
+      ;; Halt
+      99 (dissoc state :inputs))))
 
 (defn run-until-fixed
   [initial-state]
@@ -94,17 +122,25 @@
 
 (defn solve-p1
   [memory]
-  (run-until-fixed {:memory (zipmap (range) memory)
-                    :location 0
-                    :rel-base 0
-                    :inputs [1]}))
+  (->> (run-until-fixed {:memory (zipmap (range) memory)
+                         :location 0
+                         :rel-base 0
+                         :inputs [1]})
+       :outputs
+       first))
 
 (defn solve-p2
   [memory]
-  (run-until-fixed {:memory (zipmap (range) memory)
-                    :location 0
-                    :rel-base 0
-                    :inputs [2]}))
+  (->> (run-until-fixed {:memory (zipmap (range) memory)
+                         :location 0
+                         :rel-base 0
+                         :inputs [2]})
+       :outputs
+       first))
+
+(comment
+  (solve-p1 memory)
+  (solve-p2 memory))
 
 (comment
   (step-state {:memory [1 0 2 1] :location 0})
