@@ -47,9 +47,6 @@
            [(n-asteroids-in-los asteroid (disj space asteroid))
             asteroid])))
 
-(def best-vantage-point
-  (second (find-best-vantage-point space)))
-
 (defn solve-p1
   []
   (first
@@ -58,13 +55,6 @@
 (defn manhattan-distance
   [p1 p2]
   (reduce + (map #(Math/abs ^long (- %1 %2)) p1 p2)))
-
-(defn asteroid-headings
-  [base others]
-  (map vector (map (partial unit-vector base) others)
-              (for [target others]
-                {:coordinates target
-                 :distance (manhattan-distance base target)})))
 
 (defn angle
   [[dx dy]]
@@ -80,38 +70,30 @@
 
 (defn compute-firing-sequence
   [base space]
-  (->> (reduce (fn [m [k v]]
-                 (update m k conj v))
-               {}
-               (asteroid-headings base (disj space base)))
-       (map (fn [[k v]]
-              [k (sort-by :distance v)]))
+  (->> (for [target (disj space base)]
+         {:coordinates target
+          :distance    (manhattan-distance base target)
+          :heading     (unit-vector base target)})
+       (sort-by :distance)
+       (group-by :heading)
        (sort-by (comp angle first))
-       (vec)))
-
-(defn shoot-one
-  [firing-sequence]
-  (let [current-heading (first firing-sequence)
-        remaining (update current-heading 1 rest)]
-    (if (seq (second remaining))
-      (conj (subvec firing-sequence 1) (update current-heading 1 rest))
-      (subvec firing-sequence 1))))
-
-(defn next-target
-  [firing-sequence]
-  (-> firing-sequence
-      first
-      second
-      first))
+       (map second)))
 
 (defn solve-p2
   []
-  (let [[_ base] (find-best-vantage-point space)
-        [[[_ [{[x y] :coordinates}]]]] (->> (compute-firing-sequence base space)
-                                            (iterate shoot-one)
-                                            (drop 199)
-                                            (take 1))]
-    (+ y (* 100 x))))
+  (time
+    (let [target-queues (compute-firing-sequence
+                          (second (find-best-vantage-point space))
+                          space)
+          {[x y] :coordinates} (->> target-queues
+                                    (iterate #(map next %))
+                                    (mapcat #(map first %))
+                                    (drop 199)
+                                    first)]
+      (+ y (* 100 x)))))
+
+(comment
+  (compute-firing-sequence (second (find-best-vantage-point space)) space))
 
 (comment
   (solve-p1)
