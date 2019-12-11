@@ -78,12 +78,14 @@
 
 (defn print-2D
   [grid-contents]
-  (let [x-min (apply min (map first (keys grid-contents)))
-        x-max (apply max (map first (keys grid-contents)))
-        y-min (apply min (map second (keys grid-contents)))
-        y-max (apply max (map second (keys grid-contents)))
-        render-cell #(get {:white     \X
-                           :black \.} % \space)]
+  (let [x-min       (apply min (map first (keys grid-contents)))
+        x-max       (apply max (map first (keys grid-contents)))
+        y-min       (apply min (map second (keys grid-contents)))
+        y-max       (apply max (map second (keys grid-contents)))
+        render-cell #(case %
+                       :white \X
+                       :black \space
+                       \space)]
     (doseq [y (range y-min (inc y-max))]
       (println
         (apply str
@@ -93,7 +95,7 @@
 
 (defn solve-p2
   []
-  (->> (initial-state memory :black)
+  (->> (initial-state memory :white)
        (iterate-until-fixed step-robot)
        (last)
        (:hull)
