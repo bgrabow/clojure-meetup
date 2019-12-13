@@ -1,5 +1,7 @@
 (ns aoc-2019.day-09
-  (:require [clojure.string :as str]))
+  (:refer-clojure :exclude [abs])
+  (:require [clojure.string :as str]
+            [clojure.math.numeric-tower :refer [abs]]))
 
 (defn parse-memory
   [s]
@@ -14,15 +16,24 @@
       (str/split #",")
       (->> (mapv #(bigint %)))))
 
+(defn converge
+  [f x]
+  (butlast
+    (reductions
+      (fn [x x']
+        (if (= x x')
+          (reduced x')
+          x'))
+      (iterate f x))))
+
 (defn digits-low->high
   [x]
-  (take 5
-        (concat (->> (str x)
-                     reverse
-                     (map #(Character/getNumericValue ^char %)))
-                (repeat 0))))
+  (->> (abs x)
+       (iterate #(quot % 10))
+       (take-while pos?)
+       (mapv #(mod % 10))))
 
-(defn op-location
+(defn arg-location
   [memory mode location rel-base]
   (case mode
     0 (memory location)
@@ -38,9 +49,9 @@
 
 (defn parse-op
   [{:keys [memory location rel-base]}]
-  (let [[op1 op2 & modes] (digits-low->high (memory location))
+  (let [[op1 op2 & modes] (concat (digits-low->high (memory location)) (repeat 0))
         op (+ (* 10 op2) op1)
-        arg-locations (map (fn [mode loc] (op-location memory mode loc rel-base))
+        arg-locations (map (fn [mode loc] (arg-location memory mode loc rel-base))
                            modes
                            (range-from (inc location)))]
     [op arg-locations]))
@@ -119,6 +130,15 @@
         (reduced state)
         state))
     (iterate step-state initial-state)))
+
+(defn initial-state
+  [memory]
+  {:memory (if (vector? memory)
+             (zipmap (range) memory)
+             memory)
+   :location 0
+   :rel-base 0
+   :inputs nil})
 
 (defn solve-p1
   [memory]
