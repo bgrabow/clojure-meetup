@@ -1,6 +1,5 @@
 (ns aoc-2019.day-16
-  (:require [clojure.edn :as edn]
-            [clojure.string :as str]))
+  (:require [clojure.string :as str]))
 
 (slurp "resources/input-16.txt")
 
