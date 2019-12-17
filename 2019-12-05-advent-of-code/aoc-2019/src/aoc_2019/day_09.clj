@@ -96,12 +96,12 @@
                   (update :outputs concat (list (memory x))))
 
       ;; Jump non-zero
-      5 (assoc state :location (if (zero? (memory x))
+      5 (assoc state :location (if ((fnil zero? 0) (memory x))
                                  (+ 3 location)
                                  (memory y)))
 
       ;; Jump zero
-      6 (assoc state :location (if (zero? (memory x))
+      6 (assoc state :location (if ((fnil zero? 0) (memory x))
                                  (memory y)
                                  (+ 3 location)))
 

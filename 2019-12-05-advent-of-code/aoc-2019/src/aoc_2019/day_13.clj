@@ -4,7 +4,7 @@
             [gnuplot.core :as g])
   (:import (clojure.lang PersistentQueue)))
 
-(def memory (intcode/parse-memory (slurp "resources/input-13.txt")))
+(def memory (delay (intcode/parse-memory (slurp "resources/input-13.txt"))))
 
 (def tile {0 :empty
            1 :wall
