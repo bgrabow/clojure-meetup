@@ -14,38 +14,152 @@
                        (map rest)
                        (map (fn [[n element]]
                               {:quantity (Integer/parseInt n)
-                               :product element})))
+                               :element element})))
         inputs (butlast reactants)
         out (last reactants)]
-    (merge out {:inputs (set inputs)})))
+    {(:element out) (merge out
+                           {:inputs (zipmap (map :element inputs)
+                                            (map :quantity inputs))})}))
 
 (comment
-  (parse-reaction "10 ORE => 10 A")
+  (parse-reaction "10 ORE, 8 B => 10 A")
   (map rest (re-seq #"(\d+) (\w+)" "10 ORE => 10 A")))
 
 (defn parse-reactions
   [input]
   (->> (str/split-lines input)
        (map parse-reaction)
-       vec))
+       (apply merge)))
 
-(def reactions (parse-reactions (first (nth (seq test-inputs) 1))))
+(def reactions (parse-reactions (first (nth (seq test-inputs) 3))))
+(def reactions (parse-reactions (slurp "resources/input-14.txt")))
+
+(defn consume-inventory
+  [[inventory [e q]]]
+  (let [existing (inventory e)]
+    [(assoc inventory e (max 0 ((fnil - 0) existing q)))
+     [e (max 0 ((fnil - 0 0) q existing))]]))
+
+(comment
+  (consume-inventory
+    [{"A" 2} ["B" 3]]))
 
 (defn n-reactions
   [n-needed n-products]
   (long (Math/ceil (/ n-needed n-products))))
 
-(defn mult-inputs
-  [n inputs]
-  (->> inputs
-       (map #(update % 0 * n))))
+(defn minus
+  [& xs]
+  (reduce (fnil - 0 0) xs))
 
-(let [inventory #{{:product "ORE"
-                   :quantity 1
-                   :inputs #{[1 "ORE"]}
-                   :byproducts #{}}}
-      elems #(set (map :product inventory))]
-  elems)
+(defn plus
+  [& xs]
+  (reduce (fnil + 0 0) xs))
+
+(defn simplify-deps
+  [{:keys [deps inventory reactions] :as state}]
+  (if (empty? deps)
+    state
+    (let [[e q] (peek deps)]
+      (if (= e "ORE")
+        (-> state
+            (update :deps pop)
+            (update :ore + q))
+        (let [needed (max 0 (minus q (inventory e)))
+              {:keys [quantity inputs]} (reactions e)
+              n (n-reactions needed quantity)
+              new-deps (map (fn [[e q]]
+                              [e (* q n)])
+                            inputs)
+              n-byproducts (minus (* n quantity) needed)]
+          (-> state
+              (update :deps pop)
+              (update :deps into new-deps)
+              (update-in [:inventory e] #(max 0 (minus % needed)))
+              (update-in [:inventory e] plus n-byproducts)
+              (update-in [:history e] plus n)))))))
+
+(defn validate-history
+  [{:keys [reactions history] :as state}])
+
+(comment
+  (first (drop-while (comp seq :deps) (iterate simplify-deps
+                                        {:deps [["FUEL" 1]]
+                                         :inventory {}
+                                         :ore 0
+                                         :reactions reactions
+                                         :history {}}))))
+
+(comment
+  (max 0 (- 4 5))
+  (max 0 (- 5 4))
+
+  (n-reactions 23 5)
+  (- (* 5 5) 23)
+
+  (loop [deps [["FUEL" 1]]
+         extras {}
+         ore 0]
+    (if (empty? deps)
+      ore
+      (let [[e q] (peek deps)]
+        (if (= e "ORE")
+          (recur (pop deps) extras (+ ore q))
+          (let [rx (reactions e)
+                n (n-reactions q (:quantity rx))
+                reactants (map
+                            (fn [[e q]]
+                              [e (* n q)])
+                            (:inputs rx))]
+            (loop [inventory extras])))))))
+
+(defn only-takes-ore?
+  [[inputs]]
+  (every? #{"ORE"} (map :element inputs)))
+
+(defn find-reaction
+  [reactions product]
+  (first
+    (filter
+      (fn [[_ {e :element}]]
+        (= product e))
+      reactions)))
+
+(comment
+  (find-reaction
+    '([[{:quantity 9, :element "ORE"}] {:quantity 2, :element "A"}]
+      [[{:quantity 8, :element "ORE"}] {:quantity 3, :element "B"}]
+      [[{:quantity 7, :element "ORE"}] {:quantity 5, :element "C"}])
+    "A"))
+
+
+(defn transitive-ore-reaction-one-output
+  [ore-reactions output]
+  (let [{:keys [quantity element]} output]
+    (when-let [[inputs {q :quantity}] (find-reaction ore-reactions element)]
+      (let [n (n-reactions quantity q)]))))
+
+(defn transitive-ore-reaction
+  [ore-reactions higher-order-reaction]
+  (let [inputs (first higher-order-reaction)]
+    (map (partial transitive-ore-reaction-one-output ore-reactions)
+         inputs)))
+
+(comment
+  (transitive-ore-reaction
+    '([[{:quantity 9, :element "ORE"}] {:quantity 2, :element "A"}]
+      [[{:quantity 8, :element "ORE"}] {:quantity 3, :element "B"}]
+      [[{:quantity 7, :element "ORE"}] {:quantity 5, :element "C"}])
+    [[{:quantity 3, :element "A"} {:quantity 4, :element "B"}] {:quantity 1, :element "AB"}])
+  (transitive-ore-reaction-one-output
+    '([[{:quantity 9, :element "ORE"}] {:quantity 2, :element "A"}]
+      [[{:quantity 8, :element "ORE"}] {:quantity 3, :element "B"}]
+      [[{:quantity 7, :element "ORE"}] {:quantity 5, :element "C"}])
+    {:quantity 3, :element "A"}))
+
+(comment
+  (loop [[ore-reactions others] (partition-by only-takes-ore? reactions)]
+    (keep (partial transitive-ore-reaction ore-reactions) others)))
 
 (defn filter-on
   [key-fn pred coll]
@@ -53,16 +167,16 @@
 
 (defn find-reaction-by-product
   [reactions e]
-  (first (filter #(= e (:product %)) reactions)))
+  (first (filter #(= e (:element %)) reactions)))
 
 (defn cheapest-inputs
   [reactions element quantity]
   (if (= "ORE" element)
-    {:product "ORE"
+    {:element "ORE"
      :quantity quantity}
     (let [reaction (find-reaction-by-product reactions element)]
       (set (map #(-> (cheapest-inputs reactions
-                                     (:product %)
+                                     (:element %)
                                      (:quantity %))
                      (update :quantity * (n-reactions quantity
                                                       (:quantity reaction))))
