@@ -55,4 +55,25 @@
              (set/map-invert)
              (get (list "Z" "Z"))))
 
+(defn non-euclidean-neighbors
+  [location]
+  (->> (conj (neighbors location) (portals location))
+       (filter (comp #{\.} maze))))
 
+(defn step-search
+  [{:keys [frontier visited distance]}]
+  (let [new-frontier (->> (mapcat non-euclidean-neighbors frontier)
+                          (remove visited)
+                          set)]
+    {:frontier new-frontier
+     :visited (into visited new-frontier)
+     :distance (inc distance)}))
+
+(defn solve-p1
+  []
+  (->> (iterate step-search {:frontier #{start}
+                             :visited #{start}
+                             :distance 0})
+       (drop-while #(not ((:visited %) end)))
+       first
+       :distance))
