@@ -27,8 +27,11 @@
 
 (defn portal
   [maze p]
+  ;; One of the portal's labels
   (when-let [id-1 (re-find #"[A-Z]" (str (maze p)))]
+    ;; The other of the portal's labels
     (when-let [id-2 (some #(re-find #"[A-Z]" (str %)) (map maze (neighbors p)))]
+      ;; The portal's jumping off point
       (when-let [entrance (first
                             (filter
                               (comp #{\.} maze)
